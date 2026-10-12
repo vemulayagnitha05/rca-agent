@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+results/*
+!results/demo/
+**/llm_cache/
+sheets/
+data/*
+!data/sample.jsonl

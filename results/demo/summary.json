@@ -1,0 +1,621 @@
+{
+  "meta": {
+    "n_records": 150,
+    "folds": 5,
+    "seed": 0,
+    "llm": "mock",
+    "mock": true,
+    "data": "data/sample.jsonl",
+    "data_source": "synthetic",
+    "group_by_project": true,
+    "systems": [
+      "rule",
+      "tfidf",
+      "single",
+      "rag",
+      "multi",
+      "multi_verifier"
+    ]
+  },
+  "summary": {
+    "reference": "rule",
+    "systems": {
+      "rule": {
+        "n": 150,
+        "accuracy": 0.7266666666666667,
+        "macro_precision": 0.8845070422535212,
+        "macro_recall": 0.7266666666666667,
+        "macro_f1": 0.7533256867103277,
+        "per_class": {
+          "product_bug": {
+            "precision": 0.4225352112676056,
+            "recall": 1.0,
+            "f1": 0.5940594059405941,
+            "support": 30
+          },
+          "test_bug": {
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1": 0.7499999999999999,
+            "support": 30
+          },
+          "flaky": {
+            "precision": 1.0,
+            "recall": 0.7,
+            "f1": 0.8235294117647058,
+            "support": 30
+          },
+          "environment": {
+            "precision": 1.0,
+            "recall": 0.7,
+            "f1": 0.8235294117647058,
+            "support": 30
+          },
+          "dependency_config": {
+            "precision": 1.0,
+            "recall": 0.6333333333333333,
+            "f1": 0.7755102040816326,
+            "support": 30
+          }
+        },
+        "accuracy_ci95": [
+          0.6533333333333333,
+          0.8
+        ],
+        "confusion": {
+          "product_bug": {
+            "product_bug": 30,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "test_bug": {
+            "product_bug": 12,
+            "test_bug": 18,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "flaky": {
+            "product_bug": 9,
+            "test_bug": 0,
+            "flaky": 21,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "environment": {
+            "product_bug": 9,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 21,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "dependency_config": {
+            "product_bug": 11,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 19,
+            "invalid": 0
+          }
+        },
+        "hallucination_rate": 0.0,
+        "evidence_items": 130,
+        "mean_latency_s": 0.0,
+        "total_cost_usd": 0.0,
+        "mean_cost_usd": 0.0,
+        "mean_calls": 0.0,
+        "mean_tokens": 0.0,
+        "errors": 0,
+        "invalid": 0
+      },
+      "tfidf": {
+        "n": 150,
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "product_bug": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 30
+          },
+          "test_bug": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 30
+          },
+          "flaky": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 30
+          },
+          "environment": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 30
+          },
+          "dependency_config": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 30
+          }
+        },
+        "accuracy_ci95": [
+          1.0,
+          1.0
+        ],
+        "confusion": {
+          "product_bug": {
+            "product_bug": 30,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "test_bug": {
+            "product_bug": 0,
+            "test_bug": 30,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "flaky": {
+            "product_bug": 0,
+            "test_bug": 0,
+            "flaky": 30,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "environment": {
+            "product_bug": 0,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 30,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "dependency_config": {
+            "product_bug": 0,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 30,
+            "invalid": 0
+          }
+        },
+        "hallucination_rate": null,
+        "evidence_items": 0,
+        "mean_latency_s": 0.0,
+        "total_cost_usd": 0.0,
+        "mean_cost_usd": 0.0,
+        "mean_calls": 0.0,
+        "mean_tokens": 0.0,
+        "errors": 0,
+        "invalid": 0
+      },
+      "single": {
+        "n": 150,
+        "accuracy": 0.9,
+        "macro_precision": 0.9205128205128205,
+        "macro_recall": 0.9,
+        "macro_f1": 0.8954448430638301,
+        "per_class": {
+          "product_bug": {
+            "precision": 0.8333333333333334,
+            "recall": 1.0,
+            "f1": 0.9090909090909091,
+            "support": 30
+          },
+          "test_bug": {
+            "precision": 1.0,
+            "recall": 0.9666666666666667,
+            "f1": 0.983050847457627,
+            "support": 30
+          },
+          "flaky": {
+            "precision": 0.7692307692307693,
+            "recall": 1.0,
+            "f1": 0.8695652173913044,
+            "support": 30
+          },
+          "environment": {
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1": 0.7499999999999999,
+            "support": 30
+          },
+          "dependency_config": {
+            "precision": 1.0,
+            "recall": 0.9333333333333333,
+            "f1": 0.9655172413793104,
+            "support": 30
+          }
+        },
+        "accuracy_ci95": [
+          0.8533333333333334,
+          0.9466666666666667
+        ],
+        "confusion": {
+          "product_bug": {
+            "product_bug": 30,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "test_bug": {
+            "product_bug": 0,
+            "test_bug": 29,
+            "flaky": 1,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "flaky": {
+            "product_bug": 0,
+            "test_bug": 0,
+            "flaky": 30,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "environment": {
+            "product_bug": 6,
+            "test_bug": 0,
+            "flaky": 6,
+            "environment": 18,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "dependency_config": {
+            "product_bug": 0,
+            "test_bug": 0,
+            "flaky": 2,
+            "environment": 0,
+            "dependency_config": 28,
+            "invalid": 0
+          }
+        },
+        "hallucination_rate": 0.0,
+        "evidence_items": 230,
+        "mean_latency_s": 0.00020053106666675073,
+        "total_cost_usd": 0.0,
+        "mean_cost_usd": 0.0,
+        "mean_calls": 1.0,
+        "mean_tokens": 409.16,
+        "errors": 0,
+        "invalid": 0
+      },
+      "rag": {
+        "n": 150,
+        "accuracy": 0.96,
+        "macro_precision": 0.9649769585253456,
+        "macro_recall": 0.96,
+        "macro_f1": 0.9591144738685722,
+        "per_class": {
+          "product_bug": {
+            "precision": 0.967741935483871,
+            "recall": 1.0,
+            "f1": 0.9836065573770492,
+            "support": 30
+          },
+          "test_bug": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 30
+          },
+          "flaky": {
+            "precision": 0.8571428571428571,
+            "recall": 1.0,
+            "f1": 0.923076923076923,
+            "support": 30
+          },
+          "environment": {
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.888888888888889,
+            "support": 30
+          },
+          "dependency_config": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 30
+          }
+        },
+        "accuracy_ci95": [
+          0.9266666666666666,
+          0.9866666666666667
+        ],
+        "confusion": {
+          "product_bug": {
+            "product_bug": 30,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "test_bug": {
+            "product_bug": 0,
+            "test_bug": 30,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "flaky": {
+            "product_bug": 0,
+            "test_bug": 0,
+            "flaky": 30,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "environment": {
+            "product_bug": 1,
+            "test_bug": 0,
+            "flaky": 5,
+            "environment": 24,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "dependency_config": {
+            "product_bug": 0,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 30,
+            "invalid": 0
+          }
+        },
+        "hallucination_rate": 0.0,
+        "evidence_items": 232,
+        "mean_latency_s": 0.00025342463333383116,
+        "total_cost_usd": 0.0,
+        "mean_cost_usd": 0.0,
+        "mean_calls": 1.0,
+        "mean_tokens": 680.0733333333334,
+        "errors": 0,
+        "invalid": 0
+      },
+      "multi": {
+        "n": 150,
+        "accuracy": 0.8,
+        "macro_precision": 0.8802631578947369,
+        "macro_recall": 0.8,
+        "macro_f1": 0.8081924723912554,
+        "per_class": {
+          "product_bug": {
+            "precision": 0.5263157894736842,
+            "recall": 1.0,
+            "f1": 0.6896551724137931,
+            "support": 30
+          },
+          "test_bug": {
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1": 0.7499999999999999,
+            "support": 30
+          },
+          "flaky": {
+            "precision": 0.875,
+            "recall": 0.7,
+            "f1": 0.7777777777777777,
+            "support": 30
+          },
+          "environment": {
+            "precision": 1.0,
+            "recall": 0.7,
+            "f1": 0.8235294117647058,
+            "support": 30
+          },
+          "dependency_config": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 30
+          }
+        },
+        "accuracy_ci95": [
+          0.74,
+          0.86
+        ],
+        "confusion": {
+          "product_bug": {
+            "product_bug": 30,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "test_bug": {
+            "product_bug": 12,
+            "test_bug": 18,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "flaky": {
+            "product_bug": 9,
+            "test_bug": 0,
+            "flaky": 21,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "environment": {
+            "product_bug": 6,
+            "test_bug": 0,
+            "flaky": 3,
+            "environment": 21,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "dependency_config": {
+            "product_bug": 0,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 30,
+            "invalid": 0
+          }
+        },
+        "hallucination_rate": 0.0,
+        "evidence_items": 249,
+        "mean_latency_s": 0.0002392632399979296,
+        "total_cost_usd": 0.0,
+        "mean_cost_usd": 0.0,
+        "mean_calls": 4.0,
+        "mean_tokens": 1568.4133333333334,
+        "errors": 0,
+        "invalid": 0
+      },
+      "multi_verifier": {
+        "n": 150,
+        "accuracy": 0.84,
+        "macro_precision": 0.8898217366302473,
+        "macro_recall": 0.8400000000000001,
+        "macro_f1": 0.834948633456096,
+        "per_class": {
+          "product_bug": {
+            "precision": 0.6382978723404256,
+            "recall": 1.0,
+            "f1": 0.7792207792207793,
+            "support": 30
+          },
+          "test_bug": {
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1": 0.7499999999999999,
+            "support": 30
+          },
+          "flaky": {
+            "precision": 0.8108108108108109,
+            "recall": 1.0,
+            "f1": 0.8955223880597014,
+            "support": 30
+          },
+          "environment": {
+            "precision": 1.0,
+            "recall": 0.6,
+            "f1": 0.7499999999999999,
+            "support": 30
+          },
+          "dependency_config": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 30
+          }
+        },
+        "accuracy_ci95": [
+          0.78,
+          0.8933333333333333
+        ],
+        "confusion": {
+          "product_bug": {
+            "product_bug": 30,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "test_bug": {
+            "product_bug": 11,
+            "test_bug": 18,
+            "flaky": 1,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "flaky": {
+            "product_bug": 0,
+            "test_bug": 0,
+            "flaky": 30,
+            "environment": 0,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "environment": {
+            "product_bug": 6,
+            "test_bug": 0,
+            "flaky": 6,
+            "environment": 18,
+            "dependency_config": 0,
+            "invalid": 0
+          },
+          "dependency_config": {
+            "product_bug": 0,
+            "test_bug": 0,
+            "flaky": 0,
+            "environment": 0,
+            "dependency_config": 30,
+            "invalid": 0
+          }
+        },
+        "hallucination_rate": 0.0,
+        "evidence_items": 249,
+        "mean_latency_s": 0.0004000876666653615,
+        "total_cost_usd": 0.0,
+        "mean_cost_usd": 0.0,
+        "mean_calls": 5.0,
+        "mean_tokens": 1969.3333333333333,
+        "errors": 0,
+        "invalid": 0
+      }
+    },
+    "mcnemar": {
+      "tfidf": {
+        "vs": "rule",
+        "only_this_right": 41,
+        "only_ref_right": 0,
+        "p_value": 9.094947017729282e-13
+      },
+      "single": {
+        "vs": "rule",
+        "only_this_right": 31,
+        "only_ref_right": 5,
+        "p_value": 1.2913485988974571e-05
+      },
+      "rag": {
+        "vs": "rule",
+        "only_this_right": 37,
+        "only_ref_right": 2,
+        "p_value": 2.841261448338628e-09
+      },
+      "multi": {
+        "vs": "rule",
+        "only_this_right": 11,
+        "only_ref_right": 0,
+        "p_value": 0.0009765625
+      },
+      "multi_verifier": {
+        "vs": "rule",
+        "only_this_right": 20,
+        "only_ref_right": 3,
+        "p_value": 0.00048828125
+      }
+    }
+  }
+}
