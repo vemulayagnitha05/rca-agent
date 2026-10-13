@@ -25,15 +25,14 @@ The live demo provides an interactive rule-based root-cause analyzer for softwar
 
 ### Highlights
 
-- Root-cause taxonomy covering product_bug, 	est_bug, laky, environment, and dependency_config
-laky, environment, and dependency_config
-- 🔬 Comparison framework for rule-based, TF-IDF/ML, single-agent, RAG, multi-agent, and verifier-based approaches
-- 📊 Leakage-aware cross-validation and automated evaluation metrics
-- 📈 Bootstrap confidence intervals and paired significance testing
-- 🏷️ Manual labeling tooling with inter-annotator agreement
-- 🔎 Evidence-grounding checks for unsupported explanations
-- ✅ 26 automated tests with GitHub Actions CI
-- 🚀 Deployed Streamlit demonstration for interactive RCA
+- Root-cause taxonomy covering product_bug, test_bug, flaky, environment, and dependency_config
+- Comparison framework for rule-based, TF-IDF/ML, single-agent, RAG, multi-agent, and verifier-based approaches
+- Leakage-aware cross-validation and automated evaluation metrics
+- Bootstrap confidence intervals and paired significance testing
+- Manual labeling tooling with inter-annotator agreement
+- Evidence-grounding checks for unsupported explanations
+- 26 automated tests with GitHub Actions CI
+- Deployed Streamlit demonstration for interactive RCA
 
 ## Status: what is verified and what is not
 
