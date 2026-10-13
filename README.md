@@ -9,6 +9,32 @@ It is a *measurement* project, not a product. The value is in the dataset, the l
 built in: leakage-aware cross-validation, manual-labelling tooling with inter-annotator agreement, bootstrap confidence intervals, paired
 significance tests, and an evidence-grounding check that turns "hallucination" into a number.
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-red?logo=streamlit)](https://rca-agent-demo.streamlit.app/)
+[![Tests](https://github.com/vemulayagnitha05/rca-agent/actions/workflows/tests.yml/badge.svg)](https://github.com/vemulayagnitha05/rca-agent/actions/workflows/tests.yml)
+
+## 🚀 Live Demo
+
+**Try the deployed Streamlit app:**  
+https://rca-agent-demo.streamlit.app/
+
+The live demo provides an interactive rule-based root-cause analyzer for software test failures. Paste a failing test log, optional commit message/history/diff, and receive a predicted root-cause category, confidence score, hypothesis, and supporting evidence.
+
+> **Demo note:** The deployed app is an interactive demonstration of the rule-based baseline. It does not use an external LLM and should not be interpreted as a benchmark or research result.
+
+![RCA Agent Streamlit Demo](screenshots/demo-diagnosis.png)
+
+### Highlights
+
+- Root-cause taxonomy covering product_bug, 	est_bug, laky, environment, and dependency_config
+laky, environment, and dependency_config
+- 🔬 Comparison framework for rule-based, TF-IDF/ML, single-agent, RAG, multi-agent, and verifier-based approaches
+- 📊 Leakage-aware cross-validation and automated evaluation metrics
+- 📈 Bootstrap confidence intervals and paired significance testing
+- 🏷️ Manual labeling tooling with inter-annotator agreement
+- 🔎 Evidence-grounding checks for unsupported explanations
+- ✅ 26 automated tests with GitHub Actions CI
+- 🚀 Deployed Streamlit demonstration for interactive RCA
+
 ## Status: what is verified and what is not
 
 | Part | Status |
