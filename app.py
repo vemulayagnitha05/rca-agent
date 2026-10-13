@@ -1,4 +1,4 @@
-﻿import streamlit as st
+import streamlit as st
 
 from rca.schema import FailureRecord
 from rca.systems.rule import RuleBased
@@ -7,16 +7,17 @@ from rca.taxonomy import DESCRIPTIONS, LABELS
 
 st.set_page_config(
     page_title="RCA Agent",
-    page_icon="??",
+    page_icon="\U0001F50D",
     layout="wide",
 )
 
-st.title("?? RCA Agent")
+st.title("\U0001F50D RCA Agent")
 st.subheader("Root-cause analysis of software test failures")
 
 st.info(
     "Offline demo: this interface uses the project's rule-based analyzer. "
-    "It does not call an external LLM and does not claim research performance."
+    "It does not call an external LLM and does not claim research performance. "
+    "The rule-based baseline reads only the test log (and test name)."
 )
 
 DEFAULT_LOG = """[INFO] Running test
@@ -33,17 +34,6 @@ with col1:
         value="InvoiceTest.testResolve",
     )
 
-    commit_message = st.text_input(
-        "Commit message",
-        value="Refactor internals",
-    )
-
-    history_text = st.text_input(
-        "Previous outcomes (optional)",
-        value="P P P P",
-        help="Use P for pass and F for failure, separated by spaces.",
-    )
-
 with col2:
     st.markdown("**Root-cause taxonomy**")
     for label in LABELS:
@@ -55,27 +45,15 @@ log = st.text_area(
     height=260,
 )
 
-diff = st.text_area(
-    "Relevant code diff (optional)",
-    value="diff --git a/src/Invoice.src b/src/Invoice.src\n+++ b/src/main/Invoice.java",
-    height=120,
-)
-
 analyze = st.button("Analyze failure", type="primary", use_container_width=True)
 
 if analyze:
-    history = [x.strip().upper() for x in history_text.split() if x.strip()]
-    history = [x for x in history if x in {"P", "F"}]
-
     record = FailureRecord(
         id="demo-case",
         source="streamlit-demo",
         project="demo",
         test_name=test_name,
         log=log,
-        commit_message=commit_message,
-        diff=diff,
-        history=history,
     )
 
     diagnosis = RuleBased().diagnose(record)

@@ -17,7 +17,7 @@ significance tests, and an evidence-grounding check that turns "hallucination" i
 **Try the deployed Streamlit app:**  
 https://rca-agent-demo.streamlit.app/
 
-The live demo provides an interactive rule-based root-cause analyzer for software test failures. Paste a failing test log, optional commit message/history/diff, and receive a predicted root-cause category, confidence score, hypothesis, and supporting evidence.
+The live demo provides an interactive rule-based root-cause analyzer for software test failures. Paste a failing test log and receive a predicted root-cause category, confidence score, hypothesis, and supporting evidence.
 
 > **Demo note:** The deployed app is an interactive demonstration of the rule-based baseline. It does not use an external LLM and should not be interpreted as a benchmark or research result.
 
@@ -143,6 +143,14 @@ latency, cost, verifier notes, useful for error analysis).
 4. Prompt sensitivity: report the prompt version and, ideally, repeat with a second phrasing.
 5. Non-determinism: temperature 0 helps but does not guarantee identical outputs across API versions; the cache pins them for reproduction.
 6. Taxonomy fit: some failures have several causes; the protocol picks the primary one.
+
+## Run the Streamlit demo locally
+
+````powershell
+streamlit run app.py
+````
+
+The demo uses the rule-based baseline and reads the test name and failing test log.
 
 ## Layout
 
