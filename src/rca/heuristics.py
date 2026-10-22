@@ -99,6 +99,17 @@ _GENERATED_FILES = re.compile(
 )
 
 
+_DEP_VERSION_CHANGE = re.compile(
+    r"^[+-].*(?:version|VERSION)\s*[:=]\s*[\"']?\d+(?:\.\d+)+(?:[-+][\w.-]+)?[\"']?",
+    re.I,
+)
+
+_TEST_EXPECTATION_CHANGE = re.compile(
+    r"^[+-].*(?:assert(?:Equals|Equal|True|False|That|Raises)|expected|actual|assertion|expectation)",
+    re.I,
+)
+
+
 def changed_files(diff: str) -> list[str]:
     files = []
 
@@ -152,6 +163,27 @@ def commit_signal(commit_message: str, diff: str) -> tuple[str | None, list[str]
                 and not re.search(r"\.(md|rst|txt)$", f, re.I)
             )
         ]
+
+        # A test expectation changed, even when production code changed
+        # in the same commit. This is stronger than the generic source
+        # file signal.
+        expectation_lines = [
+            line.strip()
+            for line in diff.splitlines()
+            if _TEST_EXPECTATION_CHANGE.search(line)
+        ]
+        if tests and expectation_lines:
+            return "test_bug", expectation_lines[:2]
+
+        # Dependency version changes can live inside source/config files,
+        # so inspect the diff rather than relying only on filenames.
+        dependency_lines = [
+            line.strip()
+            for line in diff.splitlines()
+            if _DEP_VERSION_CHANGE.search(line)
+        ]
+        if dependency_lines:
+            return "dependency_config", dependency_lines[:2]
 
         if dep_files and not src:
             dep_file = dep_files[0]

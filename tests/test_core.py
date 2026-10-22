@@ -69,6 +69,34 @@ class TestHeuristics(unittest.TestCase):
         self.assertEqual(H.commit_signal("x", "+++ b/src/main/Foo.java")[0], "product_bug")
         self.assertIsNone(H.commit_signal("x", "+++ b/README.md")[0])
 
+    def test_mixed_source_and_test_expectation_signal(self):
+        diff = """+++ b/src/main/Journal.java
++++ b/src/test/JournalTest.java
+@@
+-assertEquals(entryName, actual)
++assertEquals(entryID, actual)
+"""
+        self.assertEqual(H.commit_signal("Fix journal navigation", diff)[0], "test_bug")
+
+    def test_dependency_version_change_in_source_config(self):
+        diff = """+++ b/src/main/Dependencies.java
+@@
+-LOGBACK_VERSION = "1.2.11"
++LOGBACK_VERSION = "1.2.13"
+-SQLITE_VERSION = "3.36.0.3"
++SQLITE_VERSION = "3.41.2.2"
+"""
+        self.assertEqual(H.commit_signal("Update bundled dependency versions", diff)[0], "dependency_config")
+
+    def test_environment_dependency_variance_signal(self):
+        log = """AssertionError: expected image/svg+xml but got application/octet-stream
+libmagic version: 5.42
+mime type detection varies across libmagic versions
+"""
+        root_cause, evidence = H.specific_root_cause("", "", log)
+        self.assertEqual(root_cause, "environment_dependency_variance")
+        self.assertTrue(evidence)
+
 
 class TestMetrics(unittest.TestCase):
     def test_summary_known_values(self):
