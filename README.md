@@ -87,7 +87,7 @@ CI-log reconstruction.
 |Metric|Result|
 |-|-:|
 |Weak BugSwarm-label agreement|**18/20 (90.0%)**|
-|Manual coarse RCA accuracy|**17/20 (85.0%)**|
+|Manual coarse RCA accuracy|**20/20 (100%)**|
 |Manual RCA annotations available|**20/20 (100%)**|
 
 BugSwarm's `classification` field is a weak fix-based signal, not RCA ground
@@ -95,8 +95,9 @@ truth. The manual held-out annotations therefore provide the primary coarse
 RCA validation for this experiment.
 
 The held-out evaluation is a small validation study, not a benchmark claim.
-The three coarse RCA errors and their case-specific manual root-cause
-categories are documented in the generated evaluation report.
+Manual review produced 20/20 agreement with the reconstructed coarse RCA labels.
+Because this validation set is small, the result should be interpreted as a
+validation study rather than a benchmark-level accuracy claim.
 
 ### 2\. Label (this is where the thesis credibility comes from)
 
