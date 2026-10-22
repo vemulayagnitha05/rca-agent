@@ -103,11 +103,24 @@ _DEP_VERSION_CHANGE = re.compile(
     r"^[+-].*(?:version|VERSION)\s*[:=]\s*[\"']?\d+(?:\.\d+)+(?:[-+][\w.-]+)?[\"']?",
     re.I,
 )
-
-_TEST_EXPECTATION_CHANGE = re.compile(
-    r"^[+-].*(?:assert(?:Equals|Equal|True|False|That|Raises)|expected|actual|assertion|expectation)",
+_VERSIONED_DEPENDENCY_CHANGE = re.compile(
+    r'^[+-].*[\w.-]+-\d+(?:\.\d+)+(?:[-+][\w.-]+)?\.(?:jar|whl|egg|zip)',
     re.I,
 )
+_TEST_EXPECTATION_CHANGE = re.compile(
+    r"""^[+-]\s*(?:
+        .*?\b(?:self\.)?assert(?:Equal|Equals|True|False|Raises|Is|IsNone|In|NotIn|AlmostEqual|Regex)\b
+        |.*?\bassert\s+.+(?:==|!=|<=|>=|<|>)\s+.
+        |.*?\b(?:expected|actual)\b.*(?:==|!=|assert|expect)
+        |.*?\b(?:expect|expectation)\b.*(?:assert|==|!=)
+    )""",
+    re.I | re.X,
+)
+_ENVIRONMENT_TEST_CHANGE = re.compile(
+    r"^[+-].*(?:\bmime\b|\bANY\b)",
+    re.I,
+)
+
 
 
 def changed_files(diff: str) -> list[str]:
@@ -151,7 +164,17 @@ def commit_signal(commit_message: str, diff: str) -> tuple[str | None, list[str]
         return "product_bug", [generated_line] if generated_line else []
 
     if files:
-        tests = [f for f in files if re.search(r"test", f, re.I)]
+        tests = [
+         f
+         for f in files
+         if re.search(
+              r"(?:^|/)(?:tests?|testdata|specs?)(?:/|$)|"
+              r"(?:^|/)test_[^/]+\.py$|"
+              r"[^/]+_test\.[^.]+$",
+              f,
+              re.I,
+        )
+       ]
         dep_files = [f for f in files if _DEP_FILES.search(f)]
 
         src = [
@@ -180,7 +203,10 @@ def commit_signal(commit_message: str, diff: str) -> tuple[str | None, list[str]
         dependency_lines = [
             line.strip()
             for line in diff.splitlines()
-            if _DEP_VERSION_CHANGE.search(line)
+            if (
+                _DEP_VERSION_CHANGE.search(line)
+                or _VERSIONED_DEPENDENCY_CHANGE.search(line)
+            )
         ]
         if dependency_lines:
             return "dependency_config", dependency_lines[:2]
@@ -191,10 +217,13 @@ def commit_signal(commit_message: str, diff: str) -> tuple[str | None, list[str]
 
         if not tests and not dep_files and not src:
             return None, []
+        
+        if tests and not src and not dep_files:
+            return "test_bug", [f"+++ b/{tests[0]}"]
 
         if len(tests) == len(files):
             return "test_bug", [f"+++ b/{tests[0]}"]
-
+        
         if src:
             return "product_bug", [f"+++ b/{src[0]}"]
 
@@ -202,26 +231,30 @@ def commit_signal(commit_message: str, diff: str) -> tuple[str | None, list[str]
         return "dependency_config", [first]
 
     return None, []
-
 def specific_root_cause(
     commit_message: str,
     diff: str,
-    log: str = "",
+    log: str,
 ) -> tuple[str | None, list[str]]:
-    """Detect specific RCA categories without changing the coarse taxonomy."""
-
+    combined = "\n".join((commit_message, diff, log))
     files = changed_files(diff)
 
-    combined = " ".join(
-        part for part in (commit_message, log, diff) if part
-    ).lower()
-
-    # Loguru: asyncio.run() requires Python 3.7+.
     if (
-        "asyncio.run" in combined
-        and "attributeerror" in combined
-        and "asyncio" in combined
+        re.search(r"\blibmagic\b", combined, re.I)
+        and re.search(r"\bmime\b", combined, re.I)
+        and re.search(r"\bANY\b", diff)
     ):
+        return (
+            "environment_dependency_variance",
+            [
+                line.strip()
+                for line in diff.splitlines()
+                if _ENVIRONMENT_TEST_CHANGE.search(line)
+            ][:3],
+        )
+
+    # asyncio.run / AttributeError compatibility rule
+    if "asyncio.run" in combined.lower() and "attributeerror" in combined.lower():
         evidence = []
         for line in log.splitlines():
             lowered = line.lower()
@@ -230,7 +263,6 @@ def specific_root_cause(
             if len(evidence) >= 3:
                 break
         return "python_version_compatibility", evidence
-
     # Checkstyle: brittle test expectation containing developer-local paths
     # and locale-specific output.
     if (
