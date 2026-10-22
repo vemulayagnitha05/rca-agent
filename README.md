@@ -9,39 +9,16 @@ It is a *measurement* project, not a product. The value is in the dataset, the l
 built in: leakage-aware cross-validation, manual-labelling tooling with inter-annotator agreement, bootstrap confidence intervals, paired
 significance tests, and an evidence-grounding check that turns "hallucination" into a number.
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-red?logo=streamlit)](https://rca-agent-demo.streamlit.app/)
-[![Tests](https://github.com/vemulayagnitha05/rca-agent/actions/workflows/tests.yml/badge.svg)](https://github.com/vemulayagnitha05/rca-agent/actions/workflows/tests.yml)
-
-## 🚀 Live Demo
-
-**Try the deployed Streamlit app:**  
-https://rca-agent-demo.streamlit.app/
-
-The live demo provides an interactive rule-based root-cause analyzer for software test failures. Paste a failing test log and receive a predicted root-cause category, confidence score, hypothesis, and supporting evidence.
-
-> **Demo note:** The deployed app is an interactive demonstration of the rule-based baseline. It does not use an external LLM and should not be interpreted as a benchmark or research result.
-
-![RCA Agent Streamlit Demo](screenshots/demo-diagnosis.png)
-
-### Highlights
-
-- Root-cause taxonomy covering product_bug, test_bug, flaky, environment, and dependency_config
-- Comparison framework for rule-based, TF-IDF/ML, single-agent, RAG, multi-agent, and verifier-based approaches
-- Leakage-aware cross-validation and automated evaluation metrics
-- Bootstrap confidence intervals and paired significance testing
-- Manual labeling tooling with inter-annotator agreement
-- Evidence-grounding checks for unsupported explanations
-- 26 automated tests with GitHub Actions CI
-- Deployed Streamlit demonstration for interactive RCA
-
 ## Status: what is verified and what is not
 
 | Part | Status |
 |---|---|
-| Harness, metrics, systems, converters, labelling tools | Written and covered by 26 unit tests (all pass). |
+| Harness, metrics, systems, converters, labelling tools | Implemented and covered by 27 unit tests (all pass). |
 | Offline demo on synthetic data with the mock LLM | Runs end to end. **Pipeline check only, not a research result.** |
-| Real LLM runs (`--llm anthropic`) | Implemented, **not run** (no API access or datasets in the build environment). |
-| IDoFT, BugSwarm, GitBug-Java, LogChunks | **Not downloaded** (network blocked in the build environment). Converters are written against the documented formats; the BugSwarm field names in particular were not checked against a live export. Test the converters on a few real rows first. |
+| Real BugSwarm integration | Verified against real BugSwarm metadata and real artifact evidence. |
+| BugSwarm held-out evaluation | 20 real artifacts evaluated with the frozen rule-based RCA system. Manual coarse RCA validation: **17/20 (85.0%)**; weak BugSwarm-label agreement: **18/20 (90.0%)**. |
+| Real LLM runs (`--llm anthropic`) | Implemented, **not run** in this evaluation. |
+| Other datasets (IDoFT, GitBug-Java, LogChunks) | Converters are implemented, but they were not part of the completed held-out BugSwarm evaluation. |
 
 The mock LLM (`--llm mock`) is a deterministic heuristic that reads the same signals as the rule-based system. Differences between systems under
 the mock reflect how those heuristics combine, not how language models behave. For the same reason the TF-IDF baseline scores 100% on the synthetic
@@ -51,7 +28,7 @@ sample: the logs are template-generated. Never report numbers from the synthetic
 
 | Name | What it is | LLM calls/record |
 |---|---|---|
-| `rule` | Regex signatures on the log, then "where was the exception thrown" (test vs production code). No history, no commit. | 0 |
+| `rule` | Rule-based RCA using build logs, history, commit/diff signals, and targeted failure heuristics. | 0 |
 | `tfidf` | TF-IDF + logistic regression on test name, log and commit message, trained inside each fold. The *trained ML* baseline. | 0 |
 | `single` | One prompt that sees the full case (log, history, commit, diff). A fair monolithic baseline. | 1 |
 | `rag` | `single` plus the 3 most similar labelled failures from the training fold. | 1 |
@@ -83,6 +60,34 @@ python -m unittest discover -s tests                          # or: pytest
 | LogChunks | Zenodo, DOI 10.5281/zenodo.3632351 (CC BY 4.0 on the Hugging Face copy) | 797 Travis build logs from 80 repos with the labelled failure chunk | `rca convert-dir --dir logchunks/logs --source logchunks --out ...` |
 
 Check each dataset's licence before redistributing anything derived from it.
+
+### BugSwarm held-out evaluation
+
+The completed evaluation uses 20 real BugSwarm artifacts selected from the
+reproduced, active artifact population. The held-out cases are artifact-disjoint
+from the development set, and the rule-based system was frozen before the
+held-out manual RCA annotations were added.
+
+The evaluation uses real BugSwarm metadata and failed→passed artifact diffs.
+Historical build logs were not available for these cases through the available
+BugSwarm log endpoint, so the held-out run was performed with empty logs. This
+is an important limitation: the result measures the frozen rule system using
+the available metadata and change evidence, rather than a complete historical
+CI-log reconstruction.
+
+| Metric | Result |
+|---|---:|
+| Weak BugSwarm-label agreement | **18/20 (90.0%)** |
+| Manual coarse RCA accuracy | **17/20 (85.0%)** |
+| Manual RCA annotations available | **20/20 (100%)** |
+
+BugSwarm's `classification` field is a weak fix-based signal, not RCA ground
+truth. The manual held-out annotations therefore provide the primary coarse
+RCA validation for this experiment.
+
+The held-out evaluation is a small validation study, not a benchmark claim.
+The three coarse RCA errors and their case-specific manual root-cause
+categories are documented in the generated evaluation report.
 
 ### 2. Label (this is where the thesis credibility comes from)
 
@@ -144,14 +149,6 @@ latency, cost, verifier notes, useful for error analysis).
 5. Non-determinism: temperature 0 helps but does not guarantee identical outputs across API versions; the cache pins them for reproduction.
 6. Taxonomy fit: some failures have several causes; the protocol picks the primary one.
 
-## Run the Streamlit demo locally
-
-````powershell
-streamlit run app.py
-````
-
-The demo uses the rule-based baseline and reads the test name and failing test log.
-
 ## Layout
 
 ```
@@ -162,7 +159,7 @@ src/rca/
   llm.py  prompts.py              Anthropic client, disk cache, mock LLM, prompts
   grounding.py  heuristics.py     evidence-grounding check, hand-written signals
   evaluate.py  metrics.py  report.py  labeling.py  cli.py
-tests/test_core.py                26 unit tests
+tests/test_core.py                27 unit tests
 data/sample.jsonl                 synthetic sample (pipeline testing only)
 results/demo/                     example report from the offline demo
 docs/LABELING_PROTOCOL.md
