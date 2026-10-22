@@ -83,8 +83,9 @@ def cmd_kappa(a):
 def cmd_run(a):
     records = [r for p in a.data for r in load_jsonl(p)]
     n_all = len(records)
-    records = [r for r in records if r.label]
-    print(f"loaded {n_all} records, {len(records)} labelled")
+    labelled_records = [r for r in records if r.label]
+    print(f"loaded {n_all} records, {len(labelled_records)} labelled")
+
     if not a.allow_empty_log:
         before = len(records)
         records = [r for r in records if r.log.strip()]

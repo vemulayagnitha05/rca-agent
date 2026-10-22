@@ -1,18 +1,17 @@
 """Converter for BugSwarm artifacts exported as JSON.
 
-Get the data:  https://www.bugswarm.org  (dataset browser, REST API and CLI; see their docs for export)
-Source:        https://github.com/bugswarm/bugswarm
+BugSwarm artifact fields used here were verified against the BugSwarm REST API
+and a real artifact export.
 
-Expected input: a JSON list of artifact objects. Fields read (all optional, missing ones are tolerated):
-  image_tag, repo, lang, failed_job.{job_id, trigger_sha}, classification.{build, code, test}
-plus an optional directory of build logs named `<image_tag>.log` or `<failed_job.job_id>.log`.
+IMPORTANT - labels are WEAK. BugSwarm's `classification` describes which
+kinds of files the fix touched (source code / tests / build files), not why
+the test failed. They are mapped here only as a starting point:
+  code -> product_bug
+  test only -> test_bug
+  build only -> dependency_config
 
-IMPORTANT - labels are WEAK. BugSwarm's `classification` describes which kinds of files the *fix* touched
-(source code / tests / build files), not why the test failed. They are mapped here only to give you a
-starting point:   code -> product_bug,  test only -> test_bug,  build only -> dependency_config.
-`flaky` and `environment` cannot be derived this way. Confirm or correct every label manually
-(`rca label-sheet` / `rca apply-labels`) before using them as ground truth. The field names above come from
-my reading of the BugSwarm docs and were NOT verified against a live export; adjust if yours differ.
+`flaky` and `environment` cannot be derived this way. Confirm or correct
+labels manually before using them as ground truth.
 """
 
 from __future__ import annotations
@@ -28,7 +27,11 @@ def _yes(v) -> bool:
 
 
 def weak_label(classification: dict) -> str | None:
-    code, test, build = (_yes(classification.get(k)) for k in ("code", "test", "build"))
+    code, test, build = (
+        _yes(classification.get(k))
+        for k in ("code", "test", "build")
+    )
+
     if code:
         return "product_bug"
     if test:
@@ -40,24 +43,72 @@ def weak_label(classification: dict) -> str | None:
 
 def convert_bugswarm(json_path, logs_dir=None) -> list[FailureRecord]:
     data = json.loads(Path(json_path).read_text(encoding="utf-8"))
+
     if isinstance(data, dict):
         data = data.get("artifacts") or data.get("data") or [data]
+
     out: list[FailureRecord] = []
+
     for i, art in enumerate(data):
-        tag = str(art.get("image_tag") or art.get("_id") or f"artifact-{i}")
+        tag = str(
+            art.get("image_tag")
+            or art.get("_id")
+            or f"artifact-{i}"
+        )
+
         failed = art.get("failed_job") or {}
+        passed = art.get("passed_job") or {}
+
         log = ""
+
         if logs_dir:
             for key in (tag, str(failed.get("job_id", ""))):
                 p = Path(logs_dir) / f"{key}.log"
+
                 if key and p.exists():
-                    log = p.read_text(encoding="utf-8", errors="replace")
+                    log = p.read_text(
+                        encoding="utf-8",
+                        errors="replace",
+                    )
                     break
+
         cls = art.get("classification") or {}
         label = weak_label(cls)
-        out.append(FailureRecord(
-            id=f"bugswarm-{tag}", source="bugswarm", project=str(art.get("repo", "")), language=str(art.get("lang", "")).lower(),
-            log=log, label=label, label_source="bugswarm-weak" if label else "",
-            meta={"image_tag": tag, "classification": cls, "trigger_sha": failed.get("trigger_sha", "")},
-        ))
+
+        meta = dict(art.get("meta") or {})
+
+        meta.update({
+          "image_tag": tag,
+          "classification": cls,
+          "trigger_sha": failed.get("trigger_sha", ""),
+          "failed_job_id": failed.get("job_id", ""),
+          "passed_job_id": passed.get("job_id", ""),
+          "failed_job": failed,
+          "passed_job": passed,
+          "metrics": art.get("metrics") or {},
+          "test_framework": art.get("test_framework", ""),
+          "pr_num": art.get("pr_num"),
+          "ci_service": art.get("ci_service", ""),
+          "build_system": art.get("build_system", ""),
+          "base_branch": art.get("base_branch", ""),
+          "branch": art.get("branch", ""),
+          })
+
+        out.append(
+            FailureRecord(
+                id=f"bugswarm-{tag}",
+                source="bugswarm",
+                project=str(art.get("repo", "")),
+                language=str(art.get("lang", "")).lower(),
+                test_name=str(failed.get("failed_tests") or ""),
+                log=log,
+                commit_message=str(failed.get("message", "")),
+                diff="",
+                history=[],
+                label=label,
+                label_source="bugswarm-weak" if label else "",
+                meta=meta,
+            )
+        )
+
     return out

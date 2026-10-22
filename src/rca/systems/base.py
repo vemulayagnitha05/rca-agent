@@ -29,6 +29,7 @@ class Diagnosis:
     confidence: float = 0.0
     usage: Usage = field(default_factory=Usage)
     notes: list[str] = field(default_factory=list)
+    root_cause: str | None = None
 
 
 class System:
@@ -54,4 +55,12 @@ def diagnosis_from_json(obj: dict | None, usage: Usage) -> Diagnosis:
         conf = float(obj.get("confidence", 0.0))
     except (TypeError, ValueError):
         conf = 0.0
-    return Diagnosis(label, str(obj.get("hypothesis", "")), [str(e) for e in evidence][:5], conf, usage)
+
+    return Diagnosis(
+        label,
+        str(obj.get("hypothesis", "")),
+        [str(e) for e in evidence][:5],
+        conf,
+        usage,
+        root_cause=obj.get("root_cause"),
+    )

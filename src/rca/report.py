@@ -10,8 +10,9 @@ from . import metrics as M
 from .taxonomy import LABELS
 
 MOCK_BANNER = (
-    "> **MOCK LLM / SYNTHETIC DATA WARNING.** If this run used `--llm mock` or the bundled synthetic sample, the numbers below only show "
-    "that the pipeline works. They are not research results.\n"
+    "> **OFFLINE / VALIDATION WARNING.** This run uses the offline rule/mock "
+    "pipeline. Metrics on a small or locally annotated validation set should "
+    "not be interpreted as benchmark-level research results.\n"
 )
 
 
@@ -22,11 +23,27 @@ def summarize(rows: list[dict], reference: str | None = None) -> dict:
     systems = {}
     for name, rs in by_sys.items():
         rs = sorted(rs, key=lambda r: r["id"])
-        gold, pred = [r["gold"] for r in rs], [r["pred"] for r in rs]
+
+        # Coarse classification metrics only use records with a coarse gold label.
+        labelled_rows = [r for r in rs if r["gold"] is not None]
+        gold = [r["gold"] for r in labelled_rows]
+        pred = [r["pred"] for r in labelled_rows]
+
         s = M.summary(gold, pred)
-        lo, hi = M.bootstrap_ci([r["correct"] for r in rs])
+        lo, hi = M.bootstrap_ci([r["correct"] for r in labelled_rows])
         ev_total = sum(r["grounded_evidence"] + r["ungrounded_evidence"] for r in rs)
         n = len(rs)
+
+        rca_rows = [
+            r for r in rs
+            if r.get("gold_root_cause") is not None
+        ]
+        specific_rca_accuracy = (
+            sum(r["root_cause_correct"] for r in rca_rows) / len(rca_rows)
+            if rca_rows
+            else None
+        )
+
         s.update({
             "accuracy_ci95": [lo, hi],
             "confusion": M.confusion(gold, pred),
@@ -39,6 +56,8 @@ def summarize(rows: list[dict], reference: str | None = None) -> dict:
             "mean_tokens": sum(r["input_tokens"] + r["output_tokens"] for r in rs) / n,
             "errors": sum(1 for r in rs if r["pred"] == "error"),
             "invalid": sum(1 for r in rs if r["pred"] == "invalid"),
+            "specific_rca_accuracy": specific_rca_accuracy,
+            "specific_rca_support": len(rca_rows),
         })
         systems[name] = s
     ref = reference if reference in by_sys else (next(iter(by_sys)) if by_sys else None)
@@ -82,6 +101,20 @@ def write_report(summary: dict, out_dir, meta: dict) -> Path:
                  f"{_fmt(s['mean_calls'], nd=1)} |")
     L += ["", "Hallucination = share of cited evidence items that do not occur verbatim in the input "
           "(n/a for systems that cite no evidence). Cost is 0 unless `RCA_PRICE_IN_PER_MTOK` / `RCA_PRICE_OUT_PER_MTOK` are set.", ""]
+    L += [
+        "## Specific root-cause accuracy",
+        "",
+        "| System | Accuracy | Support |",
+        "|---|---|---|",
+    ]
+
+    for name, s in sysd.items():
+        L.append(
+            f"| {name} | {_fmt(s['specific_rca_accuracy'], True)} | "
+            f"{s['specific_rca_support']} |"
+        )
+
+    L.append("")
     if summary["mcnemar"]:
         L += [f"## Paired significance vs `{summary['reference']}` (exact McNemar)", "",
               "| System | Only this right | Only reference right | p-value |", "|---|---|---|---|"]
