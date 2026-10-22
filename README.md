@@ -9,6 +9,14 @@ It is a *measurement* project, not a product. The value is in the dataset, the l
 built in: leakage-aware cross-validation, manual-labelling tooling with inter-annotator agreement, bootstrap confidence intervals, paired
 significance tests, and an evidence-grounding check that turns "hallucination" into a number.
 
+### Demo
+
+**Live demo:** https://rca-agent-demo.streamlit.app/
+
+![RCA Agent demo](screenshots/demo-diagnosis.png)
+
+The demo shows the rule-based analyzer diagnosing a CI failure with its predicted root-cause category, confidence, rationale, and supporting evidence.
+
 ## Status: what is verified and what is not
 
 | Part | Status |
@@ -31,11 +39,10 @@ The mock LLM (`--llm mock`) is a deterministic heuristic that reads the same sig
 |`single`|One prompt that sees the full case (log, history, commit, diff). A fair monolithic baseline.|1|
 |`rag`|`single` plus the 3 most similar labelled failures from the training fold.|1|
 |`multi`|Log analyst + history analyst + change analyst, then a lead investigator.|4|
-|`multi\\\_verifier`|`multi`, then (1) a deterministic grounding check that drops evidence not in the input, (2) a skeptical LLM reviewer that may revise the label.|5|
+|`multi_verifier`|`multi`, then (1) a deterministic grounding check that drops evidence not in the input, (2) a skeptical LLM reviewer that may revise the label.|5|
 
-Root-cause taxonomy (edit `src/rca/taxonomy.py`): `product\\\_bug`, `test\\\_bug`, `flaky`, `environment`, `dependency\\\_config`.
+Root-cause taxonomy (edit `src/rca/taxonomy.py`): `product_bug`, `test_bug`, `flaky`, `environment`, `dependency_config`.
 
-The mock LLM (`--llm mock`) is a deterministic heuristic that reads the same signals as the rule-based system. Differences between systems under the mock reflect how those heuristics combine, not how language models behave. For the same reason the TF-IDF baseline scores 100% on the synthetic sample: the logs are template-generated. \*\*Never report numbers from the synthetic sample.\*\*
 
 
 
@@ -129,7 +136,7 @@ latency, cost, verifier notes, useful for error analysis).
 * **Paired significance**: exact McNemar test of each system against a reference (`--reference`, default `rule`) on the same records.
 * **Hallucination rate**: share of cited evidence items that do not appear verbatim (whitespace/case-insensitive) in the input. It measures fabricated or
 misquoted evidence, not wrong labels. Systems that cite no evidence (`tfidf`) report n/a. Because the verifier filters ungrounded evidence by design, its
-rate is expected to be near zero; the interesting comparison is `multi` vs `multi\\\_verifier` on **accuracy** and on how often the verifier changes the label.
+rate is expected to be near zero; the interesting comparison is `multi` vs `multi_verifier` on **accuracy** and on how often the verifier changes the label.
 * **Cost and latency**: mean per record, summed over all LLM calls of a system (calls within one system run sequentially, so latency is end to end).
 * Invalid or unparseable model output counts as a wrong answer (`invalid`), and exceptions as `error`; both are shown in the confusion matrices.
 
